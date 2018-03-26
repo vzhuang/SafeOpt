@@ -291,11 +291,13 @@ def plot_3d_gp(gp, inputs, predictions=None, figure=None, axis=None,
         data = axis.plot(gp.X[:-1, unfixed[0]],
                          gp.X[:-1, unfixed[1]],
                          gp.Y[:-1, 0],
-                         'o')
-        axis.plot(gp.X[-1, unfixed[0]],
-                  gp.X[-1, unfixed[1]],
-                  gp.Y[-1, 0],
-                  'ro')
+                         'o', ms=10)
+        # print(gp.X[-1, unfixed[0]])
+        # print(gp.X)
+        # axis.plot(gp.X[-1, unfixed[0]],
+        #           gp.X[-1, unfixed[1]],
+        #           gp.Y[-1, 0],
+        #           'ro')
 
         axis.set_xlim([np.min(inputs[:, unfixed[0]]),
                        np.max(inputs[:, unfixed[0]])])
