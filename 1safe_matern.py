@@ -18,7 +18,8 @@ def main():
     num_trials = int(sys.argv[4]) # number of trials per function
     save_path = sys.argv[5] # path to save trial data    
     disc = int(sys.argv[6]) # discretization factor
-    stop = int(sys.argv[7])
+    stop = int(sys.argv[7]) # iteration at which to return to stage T
+    is_dynamic = int(sys.argv[8]) # dynamically stop safe expansion?
     
     bounds = [(0., 1.), (0., 1.)]
     noise_var = 0.05 ** 2
@@ -90,6 +91,8 @@ def run_trial(args):
         safe_seeds = np.array(safe_seeds)
         seeds = safe_seeds[np.random.choice(np.arange(len(safe_seeds)),
                                             size=num_trials, replace=False)]
+        # print(len(safe_seeds))
+        # print(thresh)
         for i, seed in enumerate(seeds):
             try:
                 print('function', func_idx, 'trial', i)
@@ -106,8 +109,10 @@ def run_trial(args):
                                                [-np.inf, thresh], lipschitz=None,
                                                threshold=thresh)
                 curr_max = -np.inf
+                safe_sizes = np.zeros(T)
+                last = stop
                 for t in range(stop):
-                    x_next = opt.optimize()
+                    x_next, ss = opt.optimize()
                     # Get a measurement from the real system
                     y_meas = fun(x_next)
                     # Add this to the GP model
@@ -117,8 +122,15 @@ def run_trial(args):
                     if y_actual > curr_max:
                         curr_max = y_actual
                     safestage_reward[t] += curr_max
-                for t in range(stop, T):
-                    x_next = opt.optimize(exploit=True)
+                    # check if we should stop dynamically
+                    safe_sizes[t] = ss
+                    if t >= 5 and ss == safe_sizes[t-5]:
+                        last = t
+                        break
+                # print(last, stop)
+                # print(safe_sizes)
+                for t in range(min(last + 1, stop), T):
+                    x_next, ss = opt.optimize(exploit=True)
                     # Get a measurement from the real system
                     y_meas = fun(x_next)
                     # Add this to the GP model
@@ -126,7 +138,8 @@ def run_trial(args):
                     y_actual = fun(x_next, noise=False)[0][0]
                     if y_actual > curr_max:
                         curr_max = y_actual
-                    safestage_reward[t] += curr_max  
+                    safestage_reward[t] += curr_max
+                    safe_sizes[t] = ss
                 # SafeOpt
                 gp = GPy.models.GPRegression(x0, y0[:, 0, None], kernel,
                                              noise_var=noise_var)
@@ -136,8 +149,9 @@ def run_trial(args):
                                              [-np.inf, thresh], lipschitz=None,
                                              threshold=thresh)
                 curr_max = -np.inf
+                opt_ss = np.zeros(T)
                 for t in range(100):
-                    x_next = opt.optimize()
+                    x_next, ss = opt.optimize()
                     # Get a measurement from the real system
                     y_meas = fun(x_next)
                     # Add this to the GP model
@@ -146,12 +160,16 @@ def run_trial(args):
                     if y_actual > curr_max:
                         curr_max = y_actual
                     safeopt_reward[t] += curr_max
+                    opt_ss[t] = ss
 
                 # save rewards
                 pref = save_path + 'function' + str(func_idx) + \
                        'trial' + str(i)
                 np.save(pref + 'stagerew', safestage_reward)
                 np.save(pref + 'optrew', safeopt_reward)
+                np.save(pref + 'stagestop', last)
+                np.save(pref + 'stagesizes', safe_sizes)
+                np.save(pref + 'optsizes', opt_ss)
             except EnvironmentError:
                 continue
             

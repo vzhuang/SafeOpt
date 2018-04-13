@@ -611,7 +611,7 @@ class SafeStage(GaussianProcessOptimization):
         else:
             self.compute_sets()
             
-        return self.get_new_query_point(ucb=ucb, exploit=exploit)
+        return self.get_new_query_point(ucb=ucb, exploit=exploit), np.count_nonzero(self.S)
 
     def get_maximum(self, context=None):
         """
@@ -1050,7 +1050,7 @@ class SafeOpt(GaussianProcessOptimization):
         else:
             self.compute_sets()
 
-        return self.get_new_query_point(ucb=ucb)
+        return self.get_new_query_point(ucb=ucb), np.count_nonzero(self.S)
 
     def get_maximum(self, context=None):
         """
