@@ -115,10 +115,12 @@ def run_trial(args):
                 cei_opt = safeopt.gp_opt.GaussianProcessOptimization([gp, gp2], parameter_set, num_contexts=0, threshold=[-np.inf, thresh])                
                 # Constrained EI
                 curr_max = y0[0][0]
+                cei_ss = np.zeros(T)
                 for t in range(T):
                     # compute CEI index
                     max_cei = -np.inf
                     max_x = parameter_set[0]
+                    safe = 0
                     for p in parameter_set:
                         y_util = fun(p, noise=False)[0][0]
                         y_safe = fun(p, noise=False)[0][1]
@@ -127,11 +129,14 @@ def run_trial(args):
                         s_std = np.sqrt(s_var)
                         u_std = np.sqrt(u_var)
                         z_util = (curr_max - u_mean) / u_std
+                        if (1 - norm.cdf((thresh-s_mean)/s_std)) > 0.999:
+                            safe += 1
                         CEI = (1 - norm.cdf((thresh-s_mean)/s_std)) * u_std * \
                               (z_util * norm.cdf(z_util) + norm.pdf(z_util))
                         if CEI > max_cei:
                             max_cei = CEI
                             max_x = p
+                    cei_ss[t] += safe
                     y_meas = fun(max_x)
                     y_actual = fun(max_x, noise=False)[0][0]
                     prob = 1. / (1 + np.exp(prev_val - y_actual))
@@ -214,6 +219,7 @@ def run_trial(args):
                 # save rewards
                 pref = save_path + 'function' + str(func_idx) + \
                        'trial' + str(i)
+                np.save(pref + 'ceisizes', cei_ss)
                 np.save(pref + 'ceirew', cei_reward)
                 np.save(pref + 'stagerew', safestage_reward)
                 np.save(pref + 'optrew', safeopt_reward)
