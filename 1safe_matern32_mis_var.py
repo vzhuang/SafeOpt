@@ -109,7 +109,7 @@ def run_trial(args):
                 gp = GPy.models.GPRegression(x0, y0[:, 0, None],
                                              kernel, noise_var=noise_var)
                 gp2 = GPy.models.GPRegression(x0, y0[:, 1, None],
-                                              kernel3 noise_var=noise_var2)
+                                              kernel3, noise_var=noise_var2)
                 safestage_reward = np.zeros(T)
                 safeopt_reward = np.zeros(T)
                 cei_reward = np.zeros(T)
