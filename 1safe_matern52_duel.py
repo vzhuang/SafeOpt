@@ -81,8 +81,8 @@ def run_trial(args):
                     return np.hstack([fun(x, noise), fun2(x, noise)])
                 safe_vals = [fun2(p, noise = False)[0][0] for
                              p in parameter_set]
-                thresh = np.mean(safe_vals) + 0.5 * np.std(safe_vals)
-                seed_thresh = np.mean(safe_vals) + np.std(safe_vals)
+                thresh = np.mean(safe_vals)
+                seed_thresh = np.mean(safe_vals) + 0.25 * np.std(safe_vals)
 
                 safe_seeds = []
                 for p in parameter_set:

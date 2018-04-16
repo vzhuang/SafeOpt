@@ -93,12 +93,12 @@ def run_trial(args):
                 safe_vals2 = [fun3(p, noise = False)[0][0] for p in parameter_set]
                 safe_vals3 = [fun4(p, noise = False)[0][0] for p in parameter_set]
                 
-                thresh1 = np.mean(safe_vals1) + 0.5 * np.std(safe_vals1)
-                seed_thresh1 = np.mean(safe_vals1) + np.std(safe_vals1)
-                thresh2 = np.mean(safe_vals2) + 0.5 * np.std(safe_vals2)
-                seed_thresh2 = np.mean(safe_vals2) + np.std(safe_vals2)
-                thresh3 = np.mean(safe_vals3) + 0.5 * np.std(safe_vals3)
-                seed_thresh3 = np.mean(safe_vals3) + np.std(safe_vals3)
+                thresh1 = np.mean(safe_vals1)
+                seed_thresh1 = np.mean(safe_vals1) + 0.25 * np.std(safe_vals1)
+                thresh2 = np.mean(safe_vals2)
+                seed_thresh2 = np.mean(safe_vals2) + 0.25 * np.std(safe_vals2)
+                thresh3 = np.mean(safe_vals3) 
+                seed_thresh3 = np.mean(safe_vals3) + 0.25 * np.std(safe_vals3)
                 
                 safe_seeds = []
                 for p in parameter_set:
