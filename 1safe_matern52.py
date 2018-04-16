@@ -113,7 +113,7 @@ def run_trial(args):
                 cei_reward = np.zeros(T)
                 # Constrained EI
                 curr_max = y0[0][0]
-                cei_opt = safeopt.gp_opt.GaussianProcessOptimization([gp, gp2], parameter_set, num_contexts=0, threshold=[-np.inf, thresh1])
+                cei_opt = safeopt.gp_opt.GaussianProcessOptimization([gp, gp2], parameter_set, num_contexts=0, threshold=[-np.inf, thresh])
                 cei_ss = np.zeros(T)
                 for t in range(T):
                     # compute CEI index
@@ -211,6 +211,7 @@ def run_trial(args):
                 # save rewards
                 pref = save_path + 'function' + str(func_idx) + \
                        'trial' + str(i)
+                np.save(pref + 'ceisizes', cei_ss)
                 np.save(pref + 'ceirew', cei_reward)
                 np.save(pref + 'stagerew', safestage_reward)
                 np.save(pref + 'optrew', safeopt_reward)
