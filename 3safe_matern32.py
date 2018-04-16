@@ -141,6 +141,8 @@ def run_trial(args):
                     max_cei = -np.inf
                     max_x = parameter_set[0]
                     safe = 0
+                    max_xpr = parameter_set[0]
+                    max_pr = 0
                     for p in parameter_set:
                         y_util = fun(p, noise=False)[0][0]
                         y_safe = fun(p, noise=False)[0][1]
@@ -152,18 +154,26 @@ def run_trial(args):
                         s_std1 = np.sqrt(s_var1)
                         s_std2 = np.sqrt(s_var2)
                         s_std3 = np.sqrt(s_var3)
+                                                
                         u_std = np.sqrt(u_var)
                         z_util = (curr_max - u_mean) / u_std
                         p1 = (1 - norm.cdf((thresh1-s_mean1)/s_std1))
                         p2 = (1 - norm.cdf((thresh2-s_mean2)/s_std2))
                         p3 = (1 - norm.cdf((thresh3-s_mean3)/s_std3))
+                        if p1 * p2 * p3 > max_pr:
+                            max_pr = p1 * p2 * p3
+                            max_xpr = p
                         if p1 > 0.999 and p2 > 0.999  and p3 > 0.999:
                             safe += 1
+                        else:
+                            continue
                         CEI = p1 * p2 * p3 * u_std * \
                               (z_util * norm.cdf(z_util) + norm.pdf(z_util))
                         if CEI > max_cei:
                             max_cei = CEI
                             max_x = p
+                    if max_cei < -1000000:
+                        max_x = max_xpr
                     cei_ss[t] += safe
                     y_meas = fun(max_x)
                     # Add this to the GP model
