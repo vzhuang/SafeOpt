@@ -74,7 +74,7 @@ def run_trial(args):
         def sample_safe_fun():
             safe_seeds = []
             while len(safe_seeds) < num_trials:
-                fun = safehopt.utilities.sample_gp_function(kernel, bounds, noise_var, disc)
+                fun = safeopt.utilities.sample_gp_function(kernel, bounds, noise_var, disc)
                 fun2 = safeopt.utilities.sample_gp_function(kernel2, bounds,
                                                   noise_var2, disc)
                 def combined_fun(x, noise=True):
