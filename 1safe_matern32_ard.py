@@ -67,10 +67,10 @@ def run_trial(args):
     lp = params['lp']
     for function in range(num_functions):
         func_idx = process * num_functions + function    
-        kernel = GPy.kern.Matern32(input_dim=len(bounds), variance=5,
-                                   lengthscale=0.5, ARD=False)
+        kernel = GPy.kern.Matern32(input_dim=len(bounds), variance=5.,
+                                   lengthscale=0.5, ARD=True)
         kernel2 = GPy.kern.Matern32(input_dim=len(bounds), variance=0.5,
-                                    lengthscale=0.5, ARD=False)
+                                    lengthscale=0.5, ARD=True)
         def sample_safe_fun():
             safe_seeds = []
             while len(safe_seeds) < num_trials:
@@ -103,8 +103,7 @@ def run_trial(args):
                 print('function', func_idx, 'trial', i)
                 CEI_regret = np.zeros(T)
                 x0 = np.array([seed])
-                y0 = fun(x0)
-                prev_val = fun(x0, noise=False)[0][0]
+                y0 = fun(x0)            
                 gp = GPy.models.GPRegression(x0, y0[:, 0, None],
                                              kernel, noise_var=noise_var)
                 gp2 = GPy.models.GPRegression(x0, y0[:, 1, None],
@@ -122,7 +121,7 @@ def run_trial(args):
                     max_x = parameter_set[0]
                     safe = 0
                     max_xpr = parameter_set[0]
-                    max_pr = 0
+                    max_pr = 0                    
                     for p in parameter_set: 
                         s_mean, s_var = gp2.predict_noiseless(np.array([p]))
                         s_std = np.sqrt(s_var)
@@ -150,16 +149,9 @@ def run_trial(args):
                         max_x = max_xpr
                     cei_ss[t] += safe
                     y_meas = fun(max_x)
-                    y_actual = fun(max_x, noise=False)[0][0]
-                    prob = 1. / (1 + np.exp(prev_val - y_actual))
-                    prev_val = y_actual
-                    update_val = 0.
-                    if np.random.random() < prob:
-                        update_val = 1.
-                    y_meas[0][0] = update_val
                     # Add this to the GP model
                     cei_opt.add_new_data_point(max_x, y_meas)                            
-
+                    y_actual = fun(max_x, noise=False)[0][0]
                     if y_actual > curr_max:
                         curr_max = y_actual
                     cei_reward[t] += curr_max

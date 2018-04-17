@@ -67,9 +67,9 @@ def run_trial(args):
     lp = params['lp']
     for function in range(num_functions):
         func_idx = process * num_functions + function    
-        kernel = GPy.kern.Matern32(input_dim=len(bounds), variance=0.5,
+        kernel = GPy.kern.Matern32(input_dim=len(bounds), variance=5.,
                                    lengthscale=0.5, ARD=False)
-        kernel2 = GPy.kern.Matern32(input_dim=len(bounds), variance=50.,
+        kernel2 = GPy.kern.Matern32(input_dim=len(bounds), variance=0.5,
                                     lengthscale=0.5, ARD=False)
         def sample_safe_fun():
             safe_seeds = []

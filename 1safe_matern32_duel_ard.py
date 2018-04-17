@@ -68,9 +68,9 @@ def run_trial(args):
     for function in range(num_functions):
         func_idx = process * num_functions + function    
         kernel = GPy.kern.Matern32(input_dim=len(bounds), variance=5,
-                                   lengthscale=0.5, ARD=False)
+                                   lengthscale=0.5, ARD=True)
         kernel2 = GPy.kern.Matern32(input_dim=len(bounds), variance=0.5,
-                                    lengthscale=0.5, ARD=False)
+                                    lengthscale=0.5, ARD=True)
         def sample_safe_fun():
             safe_seeds = []
             while len(safe_seeds) < num_trials:
