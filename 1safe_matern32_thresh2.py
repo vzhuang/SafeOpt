@@ -101,7 +101,6 @@ def run_trial(args):
         for i, seed in enumerate(seeds):
             try:
                 print('function', func_idx, 'trial', i)
-                CEI_regret = np.zeros(T)
                 x0 = np.array([seed])
                 y0 = fun(x0)            
                 gp = GPy.models.GPRegression(x0, y0[:, 0, None],
@@ -110,14 +109,11 @@ def run_trial(args):
                                               kernel2, noise_var=noise_var2)
                 safestage_reward = np.zeros(T)
                 safeopt_reward = np.zeros(T)
-                cei_reward = np.zeros(T)
-                cei_opt = safeopt.gp_opt.GaussianProcessOptimization([gp, gp2], parameter_set, num_contexts=0, threshold=[-np.inf, thresh])                
-
                         
                 gp = GPy.models.GPRegression(x0, y0[:, 0, None],
                                              kernel, noise_var=noise_var)
                 gp2 = GPy.models.GPRegression(x0, y0[:, 1, None],
-                                              kernel2, noise_var=noise_var2)                
+                                              kernel2, noise_var=noise_var2)
                 # StageOpt
                 opt = safeopt.gp_opt.SafeStage([gp, gp2], parameter_set,
                                                [-np.inf, thresh], lipschitz=None,
@@ -141,6 +137,7 @@ def run_trial(args):
                     if t >= lp and ss == safe_sizes[t-lp]:
                         last = t
                         break
+                    print(t, y_actual)
                 # print(last, stop)
                 # print(safe_sizes)
                 for t in range(min(last + 1, stop), T):
@@ -154,6 +151,7 @@ def run_trial(args):
                         curr_max = y_actual
                     safestage_reward[t] += curr_max
                     safe_sizes[t] = ss
+                    print(t, y_actual)
                 # SafeOpt
                 gp = GPy.models.GPRegression(x0, y0[:, 0, None], kernel,
                                              noise_var=noise_var)
@@ -175,6 +173,7 @@ def run_trial(args):
                         curr_max = y_actual
                     safeopt_reward[t] += curr_max
                     opt_ss[t] = ss
+                    print(t, y_actual)
 
                 # save rewards
                 pref = save_path + 'function' + str(func_idx) + \

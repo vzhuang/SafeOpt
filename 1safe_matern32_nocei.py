@@ -68,7 +68,7 @@ def run_trial(args):
     for function in range(num_functions):
         func_idx = process * num_functions + function    
         kernel = GPy.kern.Matern32(input_dim=len(bounds), variance=5.,
-                                   lengthscale=0.5, ARD=False)
+                                   lengthscale=0.2, ARD=False)
         kernel2 = GPy.kern.RBF(input_dim=len(bounds), variance=0.5,
                                     lengthscale=0.5, ARD=False)
         def sample_safe_fun():
