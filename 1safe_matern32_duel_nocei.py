@@ -177,8 +177,6 @@ def run_trial(args):
                 # save rewards
                 pref = save_path + 'function' + str(func_idx) + \
                        'trial' + str(i)
-                np.save(pref + 'ceisizes', cei_ss)                
-                np.save(pref + 'ceirew', cei_reward)
                 np.save(pref + 'stagerew', safestage_reward)
                 np.save(pref + 'optrew', safeopt_reward)
                 np.save(pref + 'stagestop', last)
