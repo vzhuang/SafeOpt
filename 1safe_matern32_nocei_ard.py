@@ -69,7 +69,7 @@ def run_trial(args):
         func_idx = process * num_functions + function    
         kernel = GPy.kern.Matern32(input_dim=len(bounds), variance=5.,
                                    lengthscale=0.5, ARD=True)
-        kernel2 = GPy.kern.rbf(input_dim=len(bounds), variance=0.5,
+        kernel2 = GPy.kern.RBF(input_dim=len(bounds), variance=0.5,
                                     lengthscale=0.5, ARD=True)
         def sample_safe_fun():
             safe_seeds = []
