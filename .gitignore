@@ -11,4 +11,6 @@ htmlcov
 build
 dist
 .eggs
+.tgz
+*~
 

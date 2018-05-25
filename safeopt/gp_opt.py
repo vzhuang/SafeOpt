@@ -648,9 +648,8 @@ class SafeStage(GaussianProcessOptimization):
 
         max_id = np.argmax(l)
         return (self.inputs[self.S, :][max_id, :-self.num_contexts or None],
-                l[max_id])
+                l[max_id])    
     
-
 
 class SafeOpt(GaussianProcessOptimization):
     """A class for Safe Bayesian Optimization.

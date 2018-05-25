@@ -70,8 +70,9 @@ def run_trial(args):
         func_idx = process * num_functions + function    
         kernel = Matern(input_dim=len(bounds), variance=5., nu=1.2,
                                    lengthscale=0.5, ARD=False)
-        kernel2 = Matern(input_dim=len(bounds), variance=0.5, nu=1.5,
+        kernel2 = GPy.kern.RBF(input_dim=len(bounds), variance=0.5,
                                     lengthscale=0.5, ARD=False)
+
         def sample_safe_fun():
             safe_seeds = []
             while len(safe_seeds) < num_trials:
