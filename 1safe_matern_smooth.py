@@ -25,8 +25,8 @@ def main():
     lp = int(sys.argv[9])
     
     bounds = [(0., 1.), (0., 1.)]
-    noise_var = 0.025
-    noise_var2 = 0.025
+    noise_var = 0.05 ** 2
+    noise_var2 = 0.05 ** 2
     parameter_set = safeopt.linearly_spaced_combinations(bounds, disc)
 
     params = {'T': T,
@@ -42,7 +42,8 @@ def main():
               'save_path': save_path,
               'lp': lp}
     
-    #run_trial(0)
+    # run_trial([0, params])
+    return 
     start_time = time.time()                                    
     p = Pool(processes = num_processes)    
     p.map_async(run_trial, zip(range(num_processes),
@@ -103,30 +104,25 @@ def run_trial(args):
         for i, seed in enumerate(seeds):
             try:
                 print('function', func_idx, 'trial', i)
-                CEI_regret = np.zeros(T)
+
                 x0 = np.array([seed])
                 y0 = fun(x0)            
-                gp = GPy.models.GPRegression(x0, y0[:, 0, None],
-                                             kernel, noise_var=noise_var)
-                gp2 = GPy.models.GPRegression(x0, y0[:, 1, None],
-                                              kernel2, noise_var=noise_var2)
                 safestage_reward = np.zeros(T)
                 safeopt_reward = np.zeros(T)
-                cei_reward = np.zeros(T)
-                cei_opt = safeopt.gp_opt.GaussianProcessOptimization([gp, gp2], parameter_set, num_contexts=0, threshold=[-np.inf, thresh])                
 
-                        
                 gp = GPy.models.GPRegression(x0, y0[:, 0, None],
                                              kernel, noise_var=noise_var)
                 gp2 = GPy.models.GPRegression(x0, y0[:, 1, None],
                                               kernel2, noise_var=noise_var2)                
                 # StageOpt
                 opt = safeopt.gp_opt.SafeStage([gp, gp2], parameter_set,
-                                               [-np.inf, thresh], lipschitz=None,
+                                               [-np.inf, thresh], beta=2.0,
+                                               lipschitz=None,
                                                threshold=0)
                 curr_max = -np.inf
                 safe_sizes = np.zeros(T)
                 last = stop
+                mean, var = gp2.predict_noiseless(x0)
                 for t in range(stop):
                     x_next, ss = opt.optimize()
                     # Get a measurement from the real system
@@ -162,10 +158,11 @@ def run_trial(args):
                 gp2 = GPy.models.GPRegression(x0, y0[:, 1, None], kernel2,
                                               noise_var=noise_var2)
                 opt = safeopt.gp_opt.SafeOpt([gp, gp2], parameter_set,
-                                             [-np.inf, thresh], lipschitz=None,
+                                             [-np.inf, thresh], beta=2.0,
+                                             lipschitz=None,
                                              threshold=0)
                 curr_max = -np.inf
-                opt_ss = np.zeros(T)
+                opt_ss = np.zeros(T)                        
                 for t in range(T):
                     x_next, ss = opt.optimize()
                     # Get a measurement from the real system
