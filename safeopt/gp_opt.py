@@ -154,7 +154,7 @@ class GaussianProcessOptimization(object):
                                     figure=figure,
                                     axis=axis)
 
-    def add_new_data_point(self, x, y, context=None, gp=None):
+    def add_new_data_point(self, x, y, context=None, gp=None, is_dueling=None, f_c=None):
         """
         Add a new function observation to the GPs.
 
@@ -186,10 +186,19 @@ class GaussianProcessOptimization(object):
                     gp.set_XY(np.vstack([gp.X, x[is_not_nan, :]]),
                               np.vstack([gp.Y, y[is_not_nan, [i]]]))
         else:
+            if is_dueling:
+                f_p = self.prev
+                p_logit = 1. / (1 + np.exp(f_p - f_c))
+                y[0][0] = 0.
+                if np.random.random() < p_logit:
+                    y[0][0] = 1.
             gp.set_XY(np.vstack([gp.X, x]),
                       np.vstack([gp.Y, y]))
 
         self.t += y.shape[1]
+
+    def set_prev(self, val):
+        self.prev = val
 
     def remove_last_data_point(self, gp=None):
         """Remove the data point that was last added to the GP.
@@ -272,7 +281,7 @@ class SafeStage(GaussianProcessOptimization):
     >>> opt.add_new_data_point(next_parameters, performance)
     """
 
-    def __init__(self, gp, parameter_set, fmin, lipschitz=None, beta=3.0,
+    def __init__(self, gp, parameter_set, fmin, lipschitz=None, beta=2.0,
                  num_contexts=0, threshold=0, scaling='auto'):
         """Initialization, see `SafeStage`."""
         super(SafeStage, self).__init__(gp, beta, num_contexts, threshold,
@@ -717,7 +726,7 @@ class SafeOpt(GaussianProcessOptimization):
     >>> opt.add_new_data_point(next_parameters, performance)
     """
 
-    def __init__(self, gp, parameter_set, fmin, lipschitz=None, beta=3.0,
+    def __init__(self, gp, parameter_set, fmin, lipschitz=None, beta=2.0,
                  num_contexts=0, threshold=0, scaling='auto'):
         """Initialization, see `SafeOpt`."""
         super(SafeOpt, self).__init__(gp, beta, num_contexts, threshold,
@@ -739,7 +748,7 @@ class SafeOpt(GaussianProcessOptimization):
             self.fmin = [self.fmin] * len(self.gps)
             if len(self.gps) > 1:
                 self.fmin[0] = None
-        self.fmin = np.atleast_1d(np.asarray(self.fmin).squeeze())
+        self.fmin = np.atleast_1d(np.asarray(self.fmin).squeeze()) 
 
         if self.liptschitz is not None:
             if not isinstance(self.liptschitz, list):
@@ -1154,7 +1163,7 @@ class SafeOptSwarm(GaussianProcessOptimization):
 
     """
 
-    def __init__(self, gp, fmin, bounds, beta=3.0, scaling='auto', threshold=0,
+    def __init__(self, gp, fmin, bounds, beta=2.0, scaling='auto', threshold=0,
                  swarm_size=20):
         """Initialization, see `SafeOptSwarm`."""
         super(SafeOptSwarm, self).__init__(gp, beta,
